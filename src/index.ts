@@ -1,3 +1,4 @@
+require('dotenv').config()
 import express, {
     Application,
     json,
@@ -15,6 +16,7 @@ import routesAPI from "./api/routes";
 import { MainController } from "./controllers/mainController";
 import { DataBase } from "./dataBase";
 import { getRandomId } from "./utils/utils";
+import { ArticlesController } from "./controllers/ArticlesController";
 
 const  {MongoClient}  = require('mongodb')
 
@@ -22,7 +24,7 @@ const app: Application = express();
 
 async function start() {
     try{
-        const client = await MongoClient.connect("mongodb+srv://slava:break2015@cluster0.6mcua.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+        const client = await MongoClient.connect(process.env.mongoUrl)
        const db = new DataBase(client.db('backend').collection('users'))
         console.log(await db.getDb())
        
@@ -52,7 +54,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 // app.get("/", (req: Request, res: Response) => {
 //     return res.send("OK");
 // });
+
 app.get("/",MainController.main)
+app.get("/articles/:id",ArticlesController.view)
 
 // app.get("/home", (req: Request, res: Response) => {
 //     return res.render("home", {
