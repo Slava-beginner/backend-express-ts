@@ -1,7 +1,9 @@
 require('dotenv').config()
 import express, {
     Application,
+    Errback,
     json,
+    NextFunction,
     Request,
     Response,
     urlencoded
@@ -9,31 +11,82 @@ import express, {
 import exphb from "express-handlebars";
 import hbs from 'hbs'
 import path from 'path'
-import routesAPI from "./api/routes";
+import routesAPI from "./routes/routes";
 
 
 
 import { MainController } from "./controllers/mainController";
-import { DataBase } from "./dataBase";
+import { DataBase } from "./dataBase/dataBase";
 import { getRandomId } from "./utils/utils";
 import { ArticlesController } from "./controllers/ArticlesController";
-
+const backend = 'backend'
 const  {MongoClient}  = require('mongodb')
+
+import mongoose,{Schema} from "mongoose";
 
 const app: Application = express();
 
-async function start() {
+let db! : DataBase;
+const PORT: string | number = process.env.PORT || 8080;
+
+async function connect() {
     try{
+        await mongoose.connect(process.env.mongoUrl)
         const client = await MongoClient.connect(process.env.mongoUrl)
-       const db = new DataBase(client.db('backend').collection('users'))
-        console.log(await db.getDb())
-       
+        db = new DataBase(client.db(backend));
+        // console.log(await db.DB("articles").clearAll())
+        // console.log(await db.DB("users").clearAll())
+        // await db.DB("users").add({
+        //     id:1,
+        //     nickname:"admin",
+        //     email:"admin@gmail.com",
+        //     is_confirmed:false,
+        //     role:"admin",
+        //     password_hash:123,
+        //     auth_token:123,
+        //     created_at:new Date()
+        // });
+        // await db.DB("users").add({
+        //     id:2,
+        //     nickname:"user",
+        //     email:"user@gmail.com",
+        //     is_confirmed:false,
+        //     role:"user",
+        //     password_hash:123,
+        //     auth_token:123,
+        //     created_at:new Date()
+        // });
+        // await db.DB("articles").add({
+        //     id:1,
+        //     author_id:1,
+        //     name:"Статья № 1",
+        //     text:'Можно взять что-то вроде Lorem Ipsum',
+        //     created_at:new Date()
+        // })
+        // await db.DB("articles").add({
+        //     id:2,
+        //     author_id:2,
+        //     name:"Статья № 2",
+        //     text:'Можно взять что-то вроде Lorem Ipsum',
+        //     created_at:new Date()
+        // })
+        // console.log(await db.DB("users").getAll())
+        // console.log(await db.DB("articles").getAll())
+        return db
     }
     catch(e){
         throw new Error('Connect error: ' + e)
     }
 }
 
+
+
+
+
+
+async function App(){
+
+await connect();
 
 // Set Template engine to handlebars
 const exphbs = exphb.create({
@@ -50,13 +103,18 @@ hbs.registerPartials(__dirname + "/views/partials");
 app.use(json());
 app.use(urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '../public')));
-// Check API Health / Ping
-// app.get("/", (req: Request, res: Response) => {
-//     return res.send("OK");
-// });
 
-app.get("/",MainController.main)
-app.get("/articles/:id",ArticlesController.view)
+const articlesController = new ArticlesController(db);
+const mainController = new MainController(db);
+
+
+
+app.get("/",(res,req) => mainController.main(res,req))
+
+app.get(/articles\/add/,(req,res) => articlesController.add(req,res))
+app.get("/articles/:id",(req,res) => articlesController.view(req,res))
+app.get("/articles/:id/edit",(req,res) => articlesController.edit(req,res))
+
 
 // app.get("/home", (req: Request, res: Response) => {
 //     return res.render("home", {
@@ -68,15 +126,20 @@ app.get("/articles/:id",ArticlesController.view)
 
 // app.get("/bye/:name",MainController.sayBye)
 // Router V1
-app.use("/api", routesAPI);
+// app.use("/api", routesAPI);
 
 // Init Express
-const PORT: string | number = process.env.PORT || 8080;
-start()
+app.use((error:Error, req:Request, res:Response, next:NextFunction) => {
+    console.log(error)
+    // Ошибка, выдаваемая в ответ на неправильно сформированный запрос
+    res.status(400)
+    res.json({text:'error'})
+  })
+
+}
+App()
 .then(() =>{
 
     app.listen(PORT, () => console.log('\x1b[33m%s\x1b[0m',`Server started on port ${PORT}\nLink - http://localhost:${PORT}`));
 
 })
-
-
