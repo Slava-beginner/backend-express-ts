@@ -12,18 +12,20 @@ export class ArticlesController{
        
         try {
             let article = await Article.getById(req.params['id']);
-            return article ?
-             res.render('article',{
-                name:await article.getName(),
-                text:await article.getText(),
-                author:(await article.getAuthor()).getNickname()
-               })
-               :
-            res.status(404).render('404')
+            if(article){
+                return res.render('article',{
+                    name:await article.getName(),
+                    text:await article.getText(),
+                    author:(await article.getAuthor()).getNickname(),
+                    id:await article.getId(),
+                    comments:await article.getComments()
+                   })
+            }
+            throw new Error('Can`t find an article')
 
         } catch (error) {
-            throw new Error('Article error ' + error)
-           
+            console.log(error)
+            res.status(404).render('404')
         }
 
            
@@ -32,26 +34,59 @@ export class ArticlesController{
     async edit(req:Request,res:Response){
         try {
             let article = await Article.getById(req.params['id']);
-            article['text'] = 'bananan'
-            article.update()
-            return article ?
-             res.render('article',{
-                name:await article.getName(),
-                text:await article.getText(),
-                author:(await article.getAuthor()).getNickname()
-               })
-               :
-            res.status(404).render('404')
+            if(article){
+                return res.render('articleEdit',{
+                    name:await article.getName(),
+                    text:await article.getText(),
+                    author:(await article.getAuthor()).getNickname(),
+                    comments:await article.getComments()
+                   })
+            }
+            throw new Error('Can`t find an article')
 
         } catch (error) {
-            throw new Error('Article update ' + error)
+            console.log(error)
+            res.status(404).render('404')
+        }
+    }
+    async save(req:Request,res:Response){
+        try {
+            let article = await Article.getById(req.params['id']);
+            if(article){
+                const {name,text} = req.body;
+                article['name'] = name;
+                article['text'] = text;
+                await article.update();
+                return  res.status(200).json({text:'Запись обновлена'})
+            }
+            throw new Error('Can`t find an article')
+
+        } catch (error) {
+            console.log(error)
+            res.status(404).render('404')
+            
+           
+        }
+    }
+    async delete(req:Request,res:Response){
+        try {
+            let article = await Article.getById(req.params['id']);
+            if(article){
+                await article.delete();
+                return res.status(200).json({text:'Запись удалена'})
+            }
+            throw new Error('Can`t find an article')
+
+        } catch (error) {
+            console.log(error)
+            res.status(404).render('404')
            
         }
     }
     async add(req:Request,res:Response){
         try {
             const article = new Article({
-                id:await Article.getLastId(),
+                id:await Article.getLastId()+1,
                 text:'Новый текст',
                 authorId:3,
                 createdAt:new Date(),

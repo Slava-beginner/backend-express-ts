@@ -16,6 +16,7 @@ export class MainController{
     }
     async main(req:Request,res:Response){
         const articles = await Article.findAll();
+        console.log(articles)
                 return res.render('main',{
                     title:'main',
                     articles:articles

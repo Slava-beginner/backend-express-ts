@@ -1,3 +1,24 @@
+<div class="wrapperArticle">
+<a href="/">На главную</a>
+<div class="info">
 <h1>{{name}}</h1>
-<p>{{text}}</p>
-<p>Автор:{{author}}</p>
+<p>ID статьи <b class="articleId">{{id}}</b></p>
+<p>Текст статьи: {{text}}</p>
+<p>Автор: <b>{{author}}</b></p>
+</div>
+
+<div class="comments">
+<div class="commentsContainer">
+ {{#if comments}}
+            {{#each comments}}
+            <blockquote class="comment" id={{this.id}}>{{this.text}}</blockquote>
+            {{/each}}
+            {{else}}
+            <p>Комментариев нет...</p>
+{{/if}}
+</div>
+<button class="addComment">Добавить комментарий</button>
+</div>
+
+</div>
+<script src="/scripts/addComment.js" type="text/javascript"></script>

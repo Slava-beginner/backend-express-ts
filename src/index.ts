@@ -23,6 +23,7 @@ const backend = 'backend'
 const  {MongoClient}  = require('mongodb')
 
 import mongoose,{Schema} from "mongoose";
+import { CommentsController } from "./controllers/CommentsControllers";
 
 const app: Application = express();
 
@@ -106,7 +107,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 const articlesController = new ArticlesController(db);
 const mainController = new MainController(db);
-
+const commentsController = new CommentsController(db);
 
 
 app.get("/",(res,req) => mainController.main(res,req))
@@ -114,15 +115,14 @@ app.get("/",(res,req) => mainController.main(res,req))
 app.get(/articles\/add/,(req,res) => articlesController.add(req,res))
 app.get("/articles/:id",(req,res) => articlesController.view(req,res))
 app.get("/articles/:id/edit",(req,res) => articlesController.edit(req,res))
+app.put("/articles/:id/save",(req,res) => articlesController.save(req,res))
+app.delete("/articles/:id/delete",(req,res) => articlesController.delete(req,res))
 
+app.post("/articles/:id/comments",(req,res) => commentsController.add(req,res))
+app.get("/comments/:id/edit",(req,res) => commentsController.edit(req,res))
+app.put("/comments/:id/save",(req,res) => commentsController.save(req,res))
+app.delete("/comments/:id/delete",(req,res) => commentsController.delete(req,res))
 
-// app.get("/home", (req: Request, res: Response) => {
-//     return res.render("home", {
-//         contohText: "Lorem Ipsum mas bro",
-//         title: "Express Typescript",
-//         link:"home"
-//     });
-// });
 
 // app.get("/bye/:name",MainController.sayBye)
 // Router V1

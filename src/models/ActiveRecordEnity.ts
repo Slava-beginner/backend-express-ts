@@ -1,6 +1,5 @@
 import mongoose,{ Schema } from "mongoose"
-import { User } from "./User"
-import { Article } from "./Article"
+
 
 const schemes : any = {
     "User":new Schema(
@@ -66,6 +65,32 @@ const schemes : any = {
             }
     
     }, 
+    {versionKey: false}),
+
+    "Comment":new Schema(
+        {
+            id:{
+                type:Number,
+                required:true
+            },
+            text:{
+                type:String,
+                required:true
+            },
+            authorId:{
+                type:Number,
+                required:true
+            },
+            articleId:{
+                type:Number,
+                required:true
+            },
+            createdAt:{
+                type:Date,
+                required:true
+            }
+    
+    }, 
     {versionKey: false})
 }
 
@@ -109,9 +134,14 @@ export abstract class ActiveRecordEntity{
     public async insert(){
         return await mongoose.model(this.constructor.name, schemes[this.constructor.name]).create(this.getProps())
     }
-
+    public async delete(){
+        return await mongoose.model(this.constructor.name, schemes[this.constructor.name]).deleteOne({id:this.id})
+    }
     public  static async getLastId() :  Promise<number>{
         let id = (await this.findAll()).map(e => e['id']).sort( (a,b) => b - a )[0]
+        if(id == undefined){
+            return 0
+        }
         return id
     }
 }

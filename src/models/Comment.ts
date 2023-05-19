@@ -1,43 +1,37 @@
 import { ActiveRecordEntity } from "./ActiveRecordEnity";
-import { Comment } from "./Comment";
 import { User } from "./User";
-export class Article extends ActiveRecordEntity{
-    private name : string
+
+export class Comment extends ActiveRecordEntity{
     private text : string;
     private authorId : number;
-  
+    private articleId : number;
 
     constructor(
         {
         id,
-        name,
         text,
         authorId,
+        articleId,
         createdAt
-        } : {id: number, name: string,text:string,authorId:number,createdAt:Date}
+        } : {id: number, articleId: number,text:string,authorId:number,createdAt:Date}
         
     ){
         super();
         this.id = id;
-        this.name = name;
         this.text = text;
         this.authorId = authorId;
+        this.articleId = articleId
         this.createdAt = createdAt
     }
     public getText(){
         return this.text
     }
-    public getName(){
-        return this.name
-    }
     public async getAuthor(){
         let author = await User.getById(this.authorId);
         return author
     }
-    public async getComments(){
-        let comments = (await Comment.findAll()).filter(e => e.articleId == this.id);
-        return comments
-    }
+   
+
   
 }
 
