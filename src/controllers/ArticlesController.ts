@@ -1,6 +1,7 @@
 import { Request,Response } from "express"
 import { DataBase } from "../dataBase/dataBase";
 import { Article } from "../models/Article";
+import { User } from "../models/User";
 export class ArticlesController{
     constructor(
         public db : DataBase
@@ -34,12 +35,14 @@ export class ArticlesController{
     async edit(req:Request,res:Response){
         try {
             let article = await Article.getById(req.params['id']);
+            let author = await article.getAuthor();
+            let users = (await User.findAll()).filter(e => e.id != author.id);
+            users.unshift(author)
             if(article){
                 return res.render('articleEdit',{
                     name:await article.getName(),
                     text:await article.getText(),
-                    author:(await article.getAuthor()).getNickname(),
-                    comments:await article.getComments()
+                    users:users
                    })
             }
             throw new Error('Can`t find an article')
@@ -53,9 +56,10 @@ export class ArticlesController{
         try {
             let article = await Article.getById(req.params['id']);
             if(article){
-                const {name,text} = req.body;
+                const {name,text,authorId} = req.body;
                 article['name'] = name;
                 article['text'] = text;
+                article['authorId'] = Number(authorId)
                 await article.update();
                 return  res.status(200).json({text:'Запись обновлена'})
             }
@@ -88,7 +92,7 @@ export class ArticlesController{
             const article = new Article({
                 id:await Article.getLastId()+1,
                 text:'Новый текст',
-                authorId:3,
+                authorId:2,
                 createdAt:new Date(),
                 name:'Статья новая'
             })

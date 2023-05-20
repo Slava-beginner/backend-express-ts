@@ -1,33 +1,36 @@
 require('dotenv').config()
 import express, {
     Application,
-    Errback,
     json,
-    NextFunction,
-    Request,
-    Response,
     urlencoded
 } from "express";
+
 import exphb from "express-handlebars";
 import hbs from 'hbs'
 import path from 'path'
-import routesAPI from "./routes/routes";
 
+// Роутеры
+import articlesRouter from './routes/articles';
+import commentsRouter from './routes/comments';
 
-
+// Контроллеры
 import { MainController } from "./controllers/mainController";
+import { UserController } from "./controllers/UserController";
+
+// Класс для БД
 import { DataBase } from "./dataBase/dataBase";
-import { getRandomId } from "./utils/utils";
-import { ArticlesController } from "./controllers/ArticlesController";
+
+
+// Монга
 const backend = 'backend'
 const  {MongoClient}  = require('mongodb')
 
-import mongoose,{Schema} from "mongoose";
-import { CommentsController } from "./controllers/CommentsControllers";
+import mongoose from "mongoose";
+
 
 const app: Application = express();
 
-let db! : DataBase;
+let db : DataBase; // поправил !
 const PORT: string | number = process.env.PORT || 8080;
 
 async function connect() {
@@ -35,6 +38,11 @@ async function connect() {
         await mongoose.connect(process.env.mongoUrl)
         const client = await MongoClient.connect(process.env.mongoUrl)
         db = new DataBase(client.db(backend));
+
+        // singleton check
+        // let t = new DataBase(); 
+        // console.log(t === db)
+
         // console.log(await db.DB("articles").clearAll())
         // console.log(await db.DB("users").clearAll())
         // await db.DB("users").add({
@@ -82,9 +90,6 @@ async function connect() {
 
 
 
-
-
-
 async function App(){
 
 await connect();
@@ -105,36 +110,34 @@ app.use(json());
 app.use(urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '../public')));
 
-const articlesController = new ArticlesController(db);
+
 const mainController = new MainController(db);
-const commentsController = new CommentsController(db);
+const userController = new UserController(db);
 
 
 app.get("/",(res,req) => mainController.main(res,req))
 
-app.get(/articles\/add/,(req,res) => articlesController.add(req,res))
-app.get("/articles/:id",(req,res) => articlesController.view(req,res))
-app.get("/articles/:id/edit",(req,res) => articlesController.edit(req,res))
-app.put("/articles/:id/save",(req,res) => articlesController.save(req,res))
-app.delete("/articles/:id/delete",(req,res) => articlesController.delete(req,res))
-
-app.post("/articles/:id/comments",(req,res) => commentsController.add(req,res))
-app.get("/comments/:id/edit",(req,res) => commentsController.edit(req,res))
-app.put("/comments/:id/save",(req,res) => commentsController.save(req,res))
-app.delete("/comments/:id/delete",(req,res) => commentsController.delete(req,res))
+/**
+ * Роуты для статей
+ */
+app.use('/articles',articlesRouter)
 
 
-// app.get("/bye/:name",MainController.sayBye)
-// Router V1
-// app.use("/api", routesAPI);
+/**
+ * Роуты для комментариев
+ */
+app.use('/comments',commentsRouter)
 
-// Init Express
-app.use((error:Error, req:Request, res:Response, next:NextFunction) => {
-    console.log(error)
-    // Ошибка, выдаваемая в ответ на неправильно сформированный запрос
-    res.status(400)
-    res.json({text:'error'})
-  })
+
+
+/**
+ * Роуты для юзеров
+ */
+app.get("/users/register",(req,res) => userController.signUp(req,res))
+app.post("/users/register",(req,res) => UserController.signUp(req,res))
+
+
+
 
 }
 App()

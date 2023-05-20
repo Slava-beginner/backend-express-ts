@@ -32,6 +32,7 @@ export class Article extends ActiveRecordEntity{
     }
     public async getAuthor(){
         let author = await User.getById(this.authorId);
+        
         return author
     }
     public async getComments(){

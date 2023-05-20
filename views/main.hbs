@@ -1,11 +1,4 @@
-<table class="layout">
-    <tr>
-        <td colspan="2" class="header">
-            Мой блог
-        </td>
-    </tr>
-    <tr>
-        <td>
+  <td>
             {{#if articles}}
             {{#each articles}}
             <a href="articles/{{this.id}}">{{this.name}}</a>
@@ -15,17 +8,4 @@
             {{else}}
             <h1>Упс.. произошла ошибка</h1>
             {{/if}}
-        </td>
-
-        <td width="300px" class="sidebar">
-            <div class="sidebarHeader">Меню</div>
-            <ul>
-                <li><a href="/">Главная страница</a></li>
-                <li><a href="/about-me">Обо мне</a></li>
-            </ul>
-        </td>
-    </tr>
-    <tr>
-        <td class="footer" colspan="2">Все права защищены (c) Мой блог</td>
-    </tr>
-</table>
+</td>

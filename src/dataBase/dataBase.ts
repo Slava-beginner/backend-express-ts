@@ -70,13 +70,17 @@ class collectionWrapper {
     private dbArticles: collectionWrapper;
     constructor(
         
-        private db: mongo.Db,
+        private db?: mongo.Db,
     ) {
+       
         //@ts-ignore
         if (typeof DataBase.instance === 'object') {
             //@ts-ignore
             return DataBase.instance
           }
+          if(!db){
+            return
+        }
         this.db = db;
         this.dbUsers = new collectionWrapper(db.collection('users'));
         this.dbArticles = new collectionWrapper(db.collection('articles'));

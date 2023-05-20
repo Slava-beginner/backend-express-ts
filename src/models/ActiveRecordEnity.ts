@@ -94,10 +94,7 @@ const schemes : any = {
     {versionKey: false})
 }
 
-// const models = {
-//     "User":mongoose.model("User", schemes["User"]),
-//     "Article":mongoose.model("Article", schemes["Article"])
-// }
+
 
 export abstract class ActiveRecordEntity{
 
@@ -123,6 +120,10 @@ export abstract class ActiveRecordEntity{
         let res =  Reflect.construct(this,[(await mongoose.model(this.name, schemes[this.name]).findOne({id:id}))],this);
         return res
     }
+    public static async getBy(name:string,value:any){
+        let res = await mongoose.model(this.name, schemes[this.name]).findOne({[name]:value});
+        return res == null ? null : Reflect.construct(this,[res]);
+    }
     public getProps(){
        let arr =  Reflect.ownKeys(this).map(e => [e,Reflect.get(this,e)]);
        //@ts-ignore
@@ -144,5 +145,6 @@ export abstract class ActiveRecordEntity{
         }
         return id
     }
+   
 }
 

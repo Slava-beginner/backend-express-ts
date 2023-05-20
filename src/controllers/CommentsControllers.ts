@@ -1,6 +1,7 @@
 import { Request,Response } from "express"
 import { DataBase } from "../dataBase/dataBase";
 import { Comment } from "../models/Comment";
+import { User } from "../models/User";
 
 export class CommentsController{
     constructor(
@@ -33,10 +34,13 @@ export class CommentsController{
     async edit(req:Request,res:Response){
         try {
             let comment = await Comment.getById(req.params['id']);
+            let author = await comment.getAuthor();
+            let users = (await User.findAll()).filter(e => e.id != author.id);
+            users.unshift(author)
             if(comment){
                 return res.render('commentEdit',{
                     text:await comment.getText(),
-                    author:(await comment.getAuthor()).getNickname()
+                    users:users
                    })
             }
             throw new Error('Comment not found')
@@ -51,8 +55,9 @@ export class CommentsController{
         try {
             let comment = await Comment.getById(req.params['id']);
             if(comment){
-                const {text} = req.body;
+                const {text,authorId} = req.body;
                 comment['text'] = text;
+                comment['authorId'] = Number(authorId)
                 await comment.update();
                 return  res.status(200).json({text:'Запись обновлена'})
             }   

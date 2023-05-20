@@ -2,8 +2,20 @@ const inp = document.querySelector("label > *");
 const submit = document.querySelector('.form__submit');
 const form = document.querySelector('#form');
 const btnDelete = document.querySelector('.form__delete');
+
+const options = document.querySelectorAll('option');
+
+
 form.addEventListener('submit',async (e) =>{
     e.preventDefault();
+
+    let authorId = null;
+    options.forEach(elem =>{
+        if(elem.selected){
+            authorId = elem.dataset.id;
+        }
+    });
+
     try {
         let resp = await fetch('./save',{
             method:"PUT",
@@ -11,7 +23,8 @@ form.addEventListener('submit',async (e) =>{
                     'Content-Type': 'application/json;charset=utf-8'
             },
             body:JSON.stringify({
-                text:inp.value
+                text:inp.value,
+                authorId:authorId
             })
         });
        return alert('Запись обновлена')

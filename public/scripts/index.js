@@ -1,17 +1,19 @@
 const inps = document.querySelectorAll("label > *");
 const submit = document.querySelector('.form__submit');
 const form = document.querySelector('#form');
-const btnDelete = document.querySelector('.form__delete')
-inps.forEach(elem =>{
-    elem.addEventListener("input", event =>{
-        if(submit.hasAttribute('disabled')){
-            submit.removeAttribute('disabled')
-        }
-        
-    })
-})
+const btnDelete = document.querySelector('.form__delete');
+
+const options = document.querySelectorAll('option');
+
+
 form.addEventListener('submit',async (e) =>{
     e.preventDefault();
+    let authorId = null;
+    options.forEach(elem =>{
+        if(elem.selected){
+            authorId = elem.dataset.id;
+        }
+    });
     try {
         let resp = await fetch('./save',{
             method:"PUT",
@@ -20,7 +22,8 @@ form.addEventListener('submit',async (e) =>{
             },
             body:JSON.stringify({
                 name:inps[0].value,
-                text:inps[1].value
+                text:inps[1].value,
+                authorId:authorId
             })
         });
         return alert('Запись обновлена')
@@ -34,7 +37,9 @@ btnDelete.onclick = async (e) =>{
         let resp = await fetch('./delete',{
             method:"DELETE",
         });
-        return alert('Запись удалена')
+        alert('Запись удалена')
+        window.location.href = '/'
+        return
     } catch (error) {
         alert('Ошибка клиента');
         throw new Error('Fetch error')
