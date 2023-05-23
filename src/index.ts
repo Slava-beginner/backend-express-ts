@@ -30,7 +30,7 @@ import mongoose from "mongoose";
 
 const app: Application = express();
 
-let db : DataBase; // поправил !
+let db : DataBase; 
 const PORT: string | number = process.env.PORT || 8080;
 
 async function connect() {
@@ -134,10 +134,13 @@ app.use('/comments',commentsRouter)
  * Роуты для юзеров
  */
 app.get("/users/register",(req,res) => userController.signUp(req,res))
-app.post("/users/register",(req,res) => UserController.signUp(req,res))
+app.post("/users/register",(req,res) =>  UserController.signUp(req,res))
 
 
-
+/**
+ * Обработка несуществующего роута
+ */
+app.use((req,res) => res.status(404).render('404'))
 
 }
 App()

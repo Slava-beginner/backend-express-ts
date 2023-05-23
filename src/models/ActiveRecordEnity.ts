@@ -117,8 +117,9 @@ export abstract class ActiveRecordEntity{
         
       }
     public static async getById(id:number){
-        let res =  Reflect.construct(this,[(await mongoose.model(this.name, schemes[this.name]).findOne({id:id}))],this);
-        return res
+        let res = await mongoose.model(this.name, schemes[this.name]).findOne({id:id})
+        return res == null ? null : Reflect.construct(this,[res]);
+        
     }
     public static async getBy(name:string,value:any){
         let res = await mongoose.model(this.name, schemes[this.name]).findOne({[name]:value});

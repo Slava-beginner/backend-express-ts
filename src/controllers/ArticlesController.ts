@@ -1,4 +1,4 @@
-import { Request,Response } from "express"
+import { NextFunction, Request,Response } from "express"
 import { DataBase } from "../dataBase/dataBase";
 import { Article } from "../models/Article";
 import { User } from "../models/User";
@@ -9,16 +9,16 @@ export class ArticlesController{
         this.db = db;
         
     }
-    async view(req:Request,res:Response){
+    async view(req:Request,res:Response,next:NextFunction){
        
         try {
             let article = await Article.getById(req.params['id']);
             if(article){
                 return res.render('article',{
-                    name:await article.getName(),
-                    text:await article.getText(),
+                    name:article.getName(),
+                    text:article.getText(),
                     author:(await article.getAuthor()).getNickname(),
-                    id:await article.getId(),
+                    id:article.getId(),
                     comments:await article.getComments()
                    })
             }
@@ -26,13 +26,13 @@ export class ArticlesController{
 
         } catch (error) {
             console.log(error)
-            res.status(404).render('404')
+            next()
         }
 
            
     }
 
-    async edit(req:Request,res:Response){
+    async edit(req:Request,res:Response,next:NextFunction){
         try {
             let article = await Article.getById(req.params['id']);
             let author = await article.getAuthor();
@@ -40,8 +40,8 @@ export class ArticlesController{
             users.unshift(author)
             if(article){
                 return res.render('articleEdit',{
-                    name:await article.getName(),
-                    text:await article.getText(),
+                    name:article.getName(),
+                    text:article.getText(),
                     users:users
                    })
             }
@@ -49,10 +49,10 @@ export class ArticlesController{
 
         } catch (error) {
             console.log(error)
-            res.status(404).render('404')
+            next()
         }
     }
-    async save(req:Request,res:Response){
+    async save(req:Request,res:Response,next:NextFunction){
         try {
             let article = await Article.getById(req.params['id']);
             if(article){
@@ -67,12 +67,12 @@ export class ArticlesController{
 
         } catch (error) {
             console.log(error)
-            res.status(404).render('404')
+            next()
             
            
         }
     }
-    async delete(req:Request,res:Response){
+    async delete(req:Request,res:Response,next:NextFunction){
         try {
             let article = await Article.getById(req.params['id']);
             if(article){
@@ -83,12 +83,18 @@ export class ArticlesController{
 
         } catch (error) {
             console.log(error)
-            res.status(404).render('404')
+            next()
            
         }
     }
     async add(req:Request,res:Response){
         try {
+            if(!req.query.authorId){
+                return res.send('Передайте id автора!')
+            }
+            if(!await User.getById(Number(req.query['authorId']))){
+                return res.send('Юзера с таким id не существует')
+            }
             const article = new Article({
                 id:await Article.getLastId()+1,
                 text:'Новый текст',
@@ -100,7 +106,7 @@ export class ArticlesController{
             return res.json({text:`Запись добавлена в базу. ID новой статьи ${article.getId()}`})
 
         } catch (error) {
-            throw new Error('Article update ' + error)
+            throw new Error('Article adding ' + error)
            
         }
     }

@@ -108,9 +108,12 @@ a, a:visited {
 }
 .comments{
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 0.5em;
+}
+.addComment{
+    align-self: start;
 }
 .commentsContainer{
     display: flex;

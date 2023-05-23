@@ -15,14 +15,15 @@ const commentsController = new CommentsController(new DataBase());
 
 router.get(/\/add/,(req,res) => articlesController.add(req,res));
 
-router.get("/:id",(req,res) => articlesController.view(req,res));
+router.get("/:id",(req,res,next) => articlesController.view(req,res,next));
 
-router.get("/:id/edit",(req,res) => articlesController.edit(req,res));
+router.get("/:id/edit",(req,res,next) => articlesController.edit(req,res,next));
 
-router.put("/:id/save",(req,res) => articlesController.save(req,res));
+router.put("/:id/save",(req,res,next) => articlesController.save(req,res,next));
 
-router.delete("/:id/delete",(req,res) => articlesController.delete(req,res));
+router.delete("/:id/delete",(req,res,next) => articlesController.delete(req,res,next));
 
 router.post("/:id/comments",(req,res) => commentsController.add(req,res));
+
 
 export default router

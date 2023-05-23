@@ -1,4 +1,4 @@
-import { Request,Response } from "express"
+import { NextFunction, Request,Response } from "express"
 import { DataBase } from "../dataBase/dataBase";
 import { Comment } from "../models/Comment";
 import { User } from "../models/User";
@@ -10,28 +10,9 @@ export class CommentsController{
         this.db = db;
         
     }
-    // async view(req:Request,res:Response){
-       
-    //     try {
-    //         let article = await Article.getById(req.params['id']);
-    //         return article ?
-    //          res.render('article',{
-    //             name:await article.getName(),
-    //             text:await article.getText(),
-    //             author:(await article.getAuthor()).getNickname()
-    //            })
-    //            :
-    //         res.status(404).render('404')
+    
 
-    //     } catch (error) {
-    //         throw new Error('Article error ' + error)
-           
-    //     }
-
-           
-    // }
-
-    async edit(req:Request,res:Response){
+    async edit(req:Request,res:Response,next:NextFunction){
         try {
             let comment = await Comment.getById(req.params['id']);
             let author = await comment.getAuthor();
@@ -39,19 +20,19 @@ export class CommentsController{
             users.unshift(author)
             if(comment){
                 return res.render('commentEdit',{
-                    text:await comment.getText(),
+                    text:comment.getText(),
                     users:users
                    })
             }
             throw new Error('Comment not found')
         } catch (error) {
             console.log(error)
-            return res.status(404).render('404')
+            next()
            
            
         }
     }
-    async save(req:Request,res:Response){
+    async save(req:Request,res:Response,next:NextFunction){
         try {
             let comment = await Comment.getById(req.params['id']);
             if(comment){
@@ -66,11 +47,11 @@ export class CommentsController{
 
         } catch (error) {
             console.log(error)
-            return res.status(404).render('404')
+            next()
            
         }
     }
-    async delete(req:Request,res:Response){
+    async delete(req:Request,res:Response,next:NextFunction){
         try {
             let comment = await Comment.getById(req.params['id']);
             if(comment){
@@ -82,7 +63,7 @@ export class CommentsController{
 
         } catch (error) {
             console.log(error)
-            return res.status(404).render('404')
+            next()
            
         }
     }
