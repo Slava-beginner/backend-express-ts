@@ -39,7 +39,7 @@ async function connect() {
         const client = await MongoClient.connect(process.env.mongoUrl)
         db = new DataBase(client.db(backend));
 
-        // singleton check
+     
         // let t = new DataBase(); 
         // console.log(t === db)
 
